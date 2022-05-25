@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import logo from "../assets/logo.svg";
 import "../assets/App.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +7,7 @@ function Home() {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
   let encryptedId = "";
+
   function findPlayer() {
     let playerName = input;
     axios({
@@ -22,13 +22,11 @@ function Home() {
       .then((response) => {
         console.log(response.status);
         encryptedId = response.data.id;
+        navigate(`/summoners/${playerName}`, { state: encryptedId });
       })
       .catch((error) => {
         console.log(error);
       });
-    setTimeout(() => {
-      navigate(`/summoners/${playerName}`, { state: encryptedId });
-    }, 1000);
   }
 
   return (
@@ -39,6 +37,7 @@ function Home() {
           <input
             id="searchBar"
             type="text"
+            placeholder="Enter summoner name"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => {

@@ -1,32 +1,68 @@
 import axios from "axios";
-import React from "react";
-import { Route, useLocation, useParams } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import "../assets/PlayerPage.css";
 
 export default function PlayerPage() {
   const { id } = useParams();
   const { state } = useLocation();
-  console.log(state);
+  let encryptedSumId = state;
+
+  useEffect(() => {
+    getStats();
+  }, [encryptedSumId]);
+
   function getStats() {
+    let summName: any = document.getElementById("summName");
+    let rank: any = document.getElementById("rank");
+    let wins: any = document.getElementById("wins");
+    let losses: any = document.getElementById("losses");
     axios({
       method: "get",
-      //url: `/${encryptedSumId}`,
+      url: `/${encryptedSumId}`,
       baseURL:
         "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner",
       params: {
-        api_key: process.env.API_KEY,
+        api_key: process.env.REACT_APP_API_KEY,
       },
     })
       .then((response) => {
-        console.log(response.data);
+        let stats = response.data[0];
+        summName.innerHTML = stats.summonerName;
+        rank.innerHTML = stats.tier + " " + stats.rank;
+        wins.innerHTML = "Wins: " + stats.wins;
+        losses.innerHTML = "Losses: " + stats.losses;
       })
       .catch((error) => {
         console.log(error);
       });
   }
   return (
-    <>
-      <div>test</div>
-      <h1>Summoner name {id}</h1>
-    </>
+    <div className="App">
+      <header className="header">
+        <table id="stats">
+          <thead>
+            <tr>
+              <th>Summoner name: </th>
+              <th id="summName"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Rank: </th>
+              <th id="rank"></th>
+            </tr>
+            <tr>
+              <th>Wins: </th>
+              <th id="wins"></th>
+            </tr>
+            <tr>
+              <th>Losses: </th>
+              <th id="losses"></th>
+            </tr>
+          </tbody>
+        </table>
+      </header>
+    </div>
   );
 }
