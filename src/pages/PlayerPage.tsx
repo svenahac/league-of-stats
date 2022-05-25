@@ -30,8 +30,8 @@ export default function PlayerPage() {
         let stats = response.data[0];
         summName.innerHTML = stats.summonerName;
         rank.innerHTML = stats.tier + " " + stats.rank;
-        wins.innerHTML = "Wins: " + stats.wins;
-        losses.innerHTML = "Losses: " + stats.losses;
+        wins.innerHTML = stats.wins;
+        losses.innerHTML = stats.losses;
       })
       .catch((error) => {
         console.log(error);
