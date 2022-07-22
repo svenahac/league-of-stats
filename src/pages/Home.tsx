@@ -8,14 +8,17 @@ function Home() {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
   let encryptedId = "";
+  let puuid = "";
 
-  function findPlayer() {
+  async function findPlayer() {
     let playerName = input;
-    axios({
+    let server = (
+      document.querySelector('input[name="region"]:checked') as HTMLInputElement
+    ).value;
+    await axios({
       method: "get",
       url: `/${playerName}`,
-      baseURL:
-        "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name",
+      baseURL: `https://${server}.api.riotgames.com/lol/summoner/v4/summoners/by-name`,
       params: {
         api_key: process.env.REACT_APP_API_KEY,
       },
@@ -23,7 +26,10 @@ function Home() {
       .then((response) => {
         console.log(response.status);
         encryptedId = response.data.id;
-        navigate(`/summoners/${playerName}`, { state: encryptedId });
+        puuid = response.data.puuid;
+        navigate(`/summoners/${playerName}`, {
+          state: { id: encryptedId, region: server, puuid: puuid },
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -48,6 +54,22 @@ function Home() {
             }}
           ></input>
           <div id="searchIcon" onClick={findPlayer}></div>
+        </div>
+        <div id="regions">
+          <input
+            type="radio"
+            id="euw"
+            name="region"
+            value="euw1"
+            defaultChecked={true}
+          ></input>
+          <label>EUW</label>
+
+          <input type="radio" id="kr" name="region" value="kr"></input>
+          <label>KR</label>
+
+          <input type="radio" id="na" name="region" value="na1"></input>
+          <label>NA</label>
         </div>
       </header>
     </div>

@@ -3,6 +3,26 @@
   color: white;
 }
 
+#main {
+  display: flex;
+  flex-direction: row;
+}
+
+#statpage {
+  width: 20rem;
+  height: 40rem;
+  border: white solid 4px;
+  border-radius: 0.5rem;
+  margin-right: 2vw;
+}
+
+#matches {
+  width: 60vw;
+  height: 40rem;
+  border: white solid 4px;
+  border-radius: 0.5rem;
+}
+
 @media screen and (max-width: 730px) {
   #stats {
     font-size: 1rem;

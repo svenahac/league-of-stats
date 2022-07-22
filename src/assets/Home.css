@@ -36,6 +36,14 @@
   border-radius: 50%;
 }
 
+#regions {
+  margin-top: 0.5rem;
+  width: 10rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 @media screen and (max-width: 730px) {
   #searchBarLayout {
     width: 20rem;
