@@ -1,16 +1,12 @@
-#stats {
-  font-size: 2rem;
-  color: white;
-}
-
 #main {
   display: flex;
   flex-direction: row;
 }
 
 #statpage {
+  color: white;
   width: 20rem;
-  height: 40rem;
+  height: 24.8rem;
   border: white solid 4px;
   border-radius: 0.5rem;
   margin-right: 2vw;
@@ -21,6 +17,120 @@
   height: 40rem;
   border: white solid 4px;
   border-radius: 0.5rem;
+  overflow: scroll;
+}
+
+#summoner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#sumName {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+#pfp {
+  z-index: 0;
+  overflow: hidden;
+  width: 150px;
+  height: 150px;
+  border: white solid 4px;
+  border-radius: 25%;
+}
+#pfp img {
+  width: 150px;
+  height: 150px;
+}
+
+#oval {
+  margin-top: -15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  background-color: white;
+  width: 60px;
+  height: 30px;
+  border-radius: 40%;
+  margin-bottom: 10px;
+}
+
+#lvl {
+  color: black;
+  font-weight: 700;
+}
+
+#solo,
+#flex {
+  position: relative;
+  width: 20rem;
+  height: 5rem;
+  border-top: white solid 2px;
+}
+
+#solo-img,
+#flex-img {
+  margin: 0;
+  position: absolute;
+  top: 38%;
+  transform: translate(0%, -50%);
+  left: 0;
+  width: 55px;
+}
+
+#solo-queue,
+#flex-queue {
+  background-color: white;
+  color: black;
+  position: absolute;
+  height: 20px;
+  width: 100px;
+  /* top: -20px; */
+  bottom: 0;
+  border-top-right-radius: 10px;
+}
+
+#solo-rank,
+#flex-rank {
+  position: absolute;
+  top: 5px;
+  left: 70px;
+  font-size: 1.25rem;
+}
+
+#solo-lp,
+#flex-lp {
+  position: absolute;
+  top: 35px;
+  left: 70px;
+}
+
+#solo-win-loss,
+#flex-win-loss {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+}
+
+#solo-wr,
+#flex-wr {
+  position: absolute;
+  top: 35px;
+  right: 20px;
+}
+
+#solo-none,
+#flex-none {
+  visibility: hidden;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
 }
 
 @media screen and (max-width: 730px) {

@@ -9,6 +9,8 @@ function Home() {
   const navigate = useNavigate();
   let encryptedId = "";
   let puuid = "";
+  let profilePicId = 0;
+  let summLvl = 0;
 
   async function findPlayer() {
     let playerName = input;
@@ -27,8 +29,16 @@ function Home() {
         console.log(response.status);
         encryptedId = response.data.id;
         puuid = response.data.puuid;
+        profilePicId = response.data.profileIconId;
+        summLvl = response.data.summonerLevel;
         navigate(`/summoners/${playerName}`, {
-          state: { id: encryptedId, region: server, puuid: puuid },
+          state: {
+            id: encryptedId,
+            region: server,
+            puuid: puuid,
+            pfpId: profilePicId,
+            lvl: summLvl,
+          },
         });
       })
       .catch((error) => {
