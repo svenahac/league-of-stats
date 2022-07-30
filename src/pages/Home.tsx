@@ -11,7 +11,47 @@ function Home() {
   let puuid = "";
   let profilePicId = 0;
   let summLvl = 0;
+  let arrayOfMatches: string[] = [];
 
+  function servMatch(serv: string) {
+    if (serv == "euw1") {
+      return "europe";
+    } else if (serv == "na1") {
+      return "americas";
+    } else if (serv == "kr") {
+      return "asia";
+    }
+  }
+
+  function getMatches(server: string, playerName: string) {
+    let matchServ = servMatch(server);
+    console.log(server);
+    axios({
+      method: "get",
+      baseURL: `https://${matchServ}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids`,
+      params: {
+        count: 5,
+        api_key: process.env.REACT_APP_API_KEY,
+      },
+    })
+      .then((response) => {
+        arrayOfMatches = response.data;
+        navigate(`/summoners/${playerName}`, {
+          state: {
+            id: encryptedId,
+            region: server,
+            puuid: puuid,
+            pfpId: profilePicId,
+            lvl: summLvl,
+            matchArr: arrayOfMatches,
+            matchServ: matchServ,
+          },
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
   async function findPlayer() {
     let playerName = input;
     let server = (
@@ -31,15 +71,7 @@ function Home() {
         puuid = response.data.puuid;
         profilePicId = response.data.profileIconId;
         summLvl = response.data.summonerLevel;
-        navigate(`/summoners/${playerName}`, {
-          state: {
-            id: encryptedId,
-            region: server,
-            puuid: puuid,
-            pfpId: profilePicId,
-            lvl: summLvl,
-          },
-        });
+        getMatches(server, playerName);
       })
       .catch((error) => {
         console.log(error);

@@ -12,14 +12,6 @@
   margin-right: 2vw;
 }
 
-#matches {
-  width: 60vw;
-  height: 40rem;
-  border: white solid 4px;
-  border-radius: 0.5rem;
-  overflow: scroll;
-}
-
 #summoner {
   display: flex;
   flex-direction: column;
@@ -131,6 +123,281 @@
   left: 50%;
   margin: 0;
   transform: translate(-50%, -50%);
+}
+
+#matches {
+  width: 36rem;
+  height: 40rem;
+  border: white solid 4px;
+  border-radius: 0.5rem;
+  z-index: 1;
+  /* overflow: scroll; */
+}
+
+.match {
+  z-index: 1;
+  overflow: hidden;
+  position: relative;
+  width: 36rem;
+  height: 7rem;
+  background-color: lightskyblue;
+  box-shadow: inset 0 0 0 4px black;
+  box-sizing: border-box;
+  margin-bottom: -4px;
+}
+
+.match .big-right-angle {
+  z-index: 1;
+  position: absolute;
+  left: 7rem;
+  height: 7rem;
+  border-left: 4px solid black;
+  width: 0px;
+  background-color: black;
+  transform: skewX(-45deg);
+}
+
+.match .small-left-angle {
+  z-index: 1;
+  position: absolute;
+  left: 6rem;
+  height: 3rem;
+  border-left: 4px solid black;
+  width: 0px;
+  background-color: black;
+  transform: skewX(45deg);
+}
+
+.match .small-right-angle {
+  position: absolute;
+  left: 10rem;
+  bottom: 0;
+  height: 2rem;
+  border-left: 4px solid black;
+  width: 0px;
+  background-color: black;
+  transform: skewX(-45deg);
+}
+
+.match .line {
+  z-index: 1;
+  position: absolute;
+  bottom: 2rem;
+  right: 0;
+  border-top: 4px solid black;
+  height: 0px;
+  width: 30.2rem;
+}
+
+.matchRes {
+  position: absolute;
+  left: -4rem;
+  top: 4px;
+  z-index: 0;
+  height: 7rem;
+  width: 11rem;
+  background-color: rgb(38, 156, 230);
+  transform: skewX(-45deg);
+}
+
+.vertical-line {
+  z-index: 1;
+  position: absolute;
+  left: 0px;
+  border-left: 4px solid black;
+  width: 0px;
+  height: 7rem;
+}
+
+.bottom-line {
+  z-index: 1;
+  position: absolute;
+  border-top: 4px solid black;
+  width: 36rem;
+  height: 0;
+  bottom: 0;
+}
+
+.lvlBox {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  background-color: white;
+  border: solid black 2px;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 25rem;
+  bottom: 0.6rem;
+  left: 0.5rem;
+}
+
+.level {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.champIcon {
+  overflow: hidden;
+  width: 4rem;
+  height: 4rem;
+  border: solid black 2px;
+  background-color: gray;
+  border-radius: 25rem;
+  position: absolute;
+  bottom: 0.6rem;
+  left: 0.5rem;
+}
+
+.score {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+  font-weight: 500;
+}
+
+.kda {
+  font-weight: 500;
+  position: absolute;
+  transform: rotate(-45deg);
+  top: 2rem;
+  left: 4.7rem;
+}
+
+.role {
+  font-size: 1.5rem;
+  font-weight: 500;
+  position: absolute;
+  bottom: 0.1rem;
+  left: 6rem;
+}
+
+.gametime {
+  font-size: 1rem;
+  font-weight: 500;
+  position: absolute;
+  bottom: 0.3rem;
+  left: 11rem;
+}
+
+.items {
+  border-radius: 25%;
+  height: 1.7rem;
+  width: 1.7rem;
+  border: black solid 4px;
+  position: absolute;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.item6 {
+  right: 0;
+}
+
+.item5 {
+  right: 2.4rem;
+}
+
+.item4 {
+  right: 4.4rem;
+}
+
+.item3 {
+  right: 6.4rem;
+}
+
+.item2 {
+  right: 8.4rem;
+}
+
+.item1 {
+  right: 10.4rem;
+}
+
+.item0 {
+  right: 12.4rem;
+}
+
+.summoner2 {
+  right: 16.2rem;
+}
+
+.summoner1 {
+  right: 18.5rem;
+}
+
+.items img {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.num-stat {
+  position: absolute;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.dmg-dealt {
+  top: 0.2rem;
+  left: 11rem;
+}
+
+.dmg-taken {
+  top: 1.2rem;
+  left: 10rem;
+}
+
+.gold {
+  top: 2.2rem;
+  left: 9rem;
+}
+
+.vision {
+  top: 3.2rem;
+  left: 8rem;
+}
+
+.queue-type {
+  position: absolute;
+  font-weight: 500;
+  left: 17rem;
+  top: 3.4rem;
+  height: 20px;
+  width: 100px;
+  background-color: white;
+  border: black solid 2px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.part-box {
+  position: absolute;
+  display: flex;
+  border: solid black 2px;
+  width: 10rem;
+  height: 4rem;
+  top: 0.4rem;
+  right: 0.4rem;
+  border-radius: 0.4rem;
+}
+
+.team1 {
+  overflow: hidden;
+  width: 5rem;
+  height: 4rem;
+  font-size: 9px;
+}
+
+.team1 ul li,
+.team2 ul li {
+  white-space: nowrap;
+}
+.team2 {
+  overflow: hidden;
+  width: 5rem;
+  height: 4rem;
+  font-size: 9px;
 }
 
 @media screen and (max-width: 730px) {

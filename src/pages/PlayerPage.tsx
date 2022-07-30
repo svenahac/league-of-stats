@@ -1,19 +1,22 @@
 import axios from "axios";
 import { stat } from "fs/promises";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "../assets/PlayerPage.css";
 
 export default function PlayerPage() {
   const { id } = useParams();
   const { state }: any = useLocation();
+  const [isLoading, setLoading] = useState(true);
   let encryptedSumId: string = state.id;
   let server: string = state.region;
   let puuid: string = state.puuid;
   let pfpId = state.pfpId;
   let lvl = state.lvl;
-  let matchServ = servMatch(server);
-  let arrayOfMatches: string[] = [];
+  // let arrayOfMatches = state.matchArr;
+  let arrayOfMatches = ["EUW1_5970140882"];
+  console.log(arrayOfMatches);
+  let matchServ = state.matchServ;
   let statDict = {
     summonerName: "",
     solo_tier: "",
@@ -27,47 +30,39 @@ export default function PlayerPage() {
     flex_losses: 0,
     flex_lp: 0,
   };
-  let matchDict = {
-    queueId: 420,
-    assists: 0,
-    kda: 0,
-    champLevel: 0,
-    champId: 0,
-    deaths: 0,
-    goldEarned: 0,
-    position: "0",
-    item0: 0,
-    item1: 0,
-    item2: 0,
-    item3: 0,
-    item4: 0,
-    item5: 0,
-    item6: 0,
-    kills: 0,
-    multikill: 0,
-    summoner1Id: 0,
-    summoner2Id: 0,
-    timePlayed: 0,
-    dmgDealt: 0,
-    dmgTaken: 0,
-    vision: 0,
-    win: false,
-  };
 
   useEffect(() => {
     getStats();
-    // getMatches();
+    //getMatches();
     // getMatchInfo("EUW1_5970140882");
   }, []);
 
-  function servMatch(serv: string) {
-    if (serv == "euw1") {
-      return "europe";
-    } else if (serv == "na1") {
-      return "americas";
-    } else if (serv == "kr") {
-      return "asia";
-    }
+  interface matchInfo {
+    participants: string[];
+    queueId: number;
+    assists: number;
+    kda: number;
+    champLevel: number;
+    champId: number;
+    deaths: number;
+    goldEarned: number;
+    position: string;
+    item0: number;
+    item1: number;
+    item2: number;
+    item3: number;
+    item4: number;
+    item5: number;
+    item6: number;
+    kills: number;
+    multikill: number;
+    summoner1Id: number;
+    summoner2Id: number;
+    timePlayed: number;
+    dmgDealt: number;
+    dmgTaken: number;
+    vision: number;
+    win: boolean;
   }
 
   function getStats() {
@@ -106,24 +101,8 @@ export default function PlayerPage() {
       });
   }
 
-  function getMatches() {
-    axios({
-      method: "get",
-      baseURL: `https://${matchServ}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids`,
-      params: {
-        api_key: process.env.REACT_APP_API_KEY,
-      },
-    })
-      .then((response) => {
-        let arrayOfMatches = response.data;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
   function getMatchInfo(matchId: string) {
-    let matchInfo: any[] = [];
+    let matchDict: matchInfo;
     axios({
       method: "get",
       url: `/${matchId}`,
@@ -134,12 +113,13 @@ export default function PlayerPage() {
     })
       .then((response) => {
         let players = response.data.info.participants;
-        let player = undefined;
+        let player;
         for (let i = 0; i < players.length; i++) {
           if (players[i].puuid == puuid) {
             player = response.data.info.participants[i];
           }
         }
+        matchDict.participants = response.data.metadata.participants;
         matchDict.queueId = response.data.info.queueId;
         matchDict.assists = player.assists;
         matchDict.kda = player.challenges.kda;
@@ -165,6 +145,7 @@ export default function PlayerPage() {
         matchDict.vision = player.visionScore;
         matchDict.win = player.win;
       })
+
       .catch((error) => {
         console.log(error);
       });
@@ -182,25 +163,26 @@ export default function PlayerPage() {
     sumName!.innerHTML = statDict.summonerName;
     let pfpic = document.getElementById("pfpic") as HTMLImageElement;
     pfpic.src = `http://ddragon.leagueoflegends.com/cdn/12.13.1/img/profileicon/${pfpId}.png`;
-
-    if (statDict.solo_losses == 0 && statDict.solo_wins == 0) {
-      for (let i = 0; i < soloBox.length; i++) {
-        soloBox[i].remove();
+    setTimeout(() => {
+      if (statDict.solo_losses == 0 && statDict.solo_wins == 0) {
+        for (let i = 0; i < soloBox.length; i++) {
+          soloBox[i].remove();
+        }
+        document.getElementById("solo-none")!.style.visibility = "visible";
+      } else {
+        let getWr = () => {
+          let sum = statDict.solo_wins + statDict.solo_losses;
+          return Math.floor(Math.round(100 * (statDict.solo_wins / sum)));
+        };
+        soloArr[1].innerHTML = statDict.solo_tier + " " + statDict.solo_rank;
+        soloArr[2].innerHTML = `${statDict.solo_lp} LP`;
+        soloArr[3].innerHTML = `${statDict.solo_wins}W ${statDict.solo_losses}L`;
+        soloArr[4].innerHTML = `Win Rate ${getWr()}%`;
+        (
+          soloArr[0] as HTMLImageElement
+        ).src = `${require(`../images/${statDict.solo_tier.toLowerCase()}.png`)}`;
       }
-      document.getElementById("solo-none")!.style.visibility = "visible";
-    } else {
-      let getWr = () => {
-        let sum = statDict.solo_wins + statDict.solo_losses;
-        return Math.floor(Math.round(100 * (statDict.solo_wins / sum)));
-      };
-      soloArr[1].innerHTML = statDict.solo_tier + " " + statDict.solo_rank;
-      soloArr[2].innerHTML = `${statDict.solo_lp} LP`;
-      soloArr[3].innerHTML = `${statDict.solo_wins}W ${statDict.solo_losses}L`;
-      soloArr[4].innerHTML = `Win Rate ${getWr()}%`;
-      (
-        soloArr[0] as HTMLImageElement
-      ).src = `${require(`../images/${statDict.solo_tier.toLowerCase()}.png`)}`;
-    }
+    }, 100);
 
     if (statDict.flex_losses == 0 && statDict.flex_wins == 0) {
       for (let i = 0; i < flexBox.length; i++) {
@@ -220,6 +202,102 @@ export default function PlayerPage() {
         flexArr[0] as HTMLImageElement
       ).src = `${require(`../images/${statDict.flex_tier.toLowerCase()}.png`)}`;
     }
+  }
+
+  function Match(props: any) {
+    // let role = "top";
+    // let matchDict = getMatchInfo(props.text);
+    //console.log(matchDict);
+    return (
+      <div className="match">
+        <div className="big-right-angle"></div>
+        <div className="small-right-angle"></div>
+        <div className="line"></div>
+        <div className="vertical-line"></div>
+        <div className="bottom-line"></div>
+        <div className="matchRes"></div>
+        <div className="lvlBox">
+          <div className="level">18</div>
+        </div>
+        <div className="champIcon"></div>
+        <div className="score">17/10/12</div>
+        <div className="kda">KDA: 3.56</div>
+        <div className="role">MID</div>
+        <div className="gametime">25m 34s</div>
+        <div className="summoner1 items">
+          <img src="http://ddragon.leagueoflegends.com/cdn/12.14.1/img/spell/SummonerFlash.png"></img>
+        </div>
+        <div className="summoner2 items">
+          <img src="http://ddragon.leagueoflegends.com/cdn/12.14.1/img/spell/SummonerExhaust.png"></img>
+        </div>
+        <div className="item0 items">
+          <img></img>
+        </div>
+        <div className="item1 items">
+          <img></img>
+        </div>
+        <div className="item2 items">
+          <img></img>
+        </div>
+        <div className="item3 items">
+          <img></img>
+        </div>
+        <div className="item4 items">
+          <img></img>
+        </div>
+        <div className="item5 items">
+          <img></img>
+        </div>
+        <div className="item6 items">
+          <img></img>
+        </div>
+        <div className="queue-type">Ranked Solo</div>
+        <div className="dmg-dealt num-stat">Damage Dealt: 300,000</div>
+        <div className="dmg-taken num-stat">Damage Taken: 230,000</div>
+        <div className="gold num-stat">Gold Earned: 37,000</div>
+        <div className="vision num-stat">Vision: 104</div>
+        <div className="part-box">
+          <div className="team1">
+            <ul>
+              <li>
+                <a>Summoner1</a>
+              </li>
+              <li>
+                <a>Summoner2</a>
+              </li>
+              <li>
+                <a>Summoner3</a>
+              </li>
+              <li>
+                <a>Summoner4</a>
+              </li>
+              <li>
+                <a>Summoner5</a>
+              </li>
+            </ul>
+          </div>
+          <div className="team2">
+            <ul>
+              <li>
+                <a>Summoner1</a>
+              </li>
+              <li>
+                <a>Summoner2</a>
+              </li>
+              <li>
+                <a>Summoner3</a>
+              </li>
+              <li>
+                <a>Summoner4</a>
+              </li>
+              <li>
+                <a>Summoner5</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -258,7 +336,7 @@ export default function PlayerPage() {
               <div id="solo-wr" className="solo soloRem">
                 Win Rate 50%
               </div>
-              <div id="solo-none">NO MATCHES PLAYED</div>
+              <div id="solo-none">UNRANKED</div>
             </div>
             <div id="flex">
               <img
@@ -279,10 +357,14 @@ export default function PlayerPage() {
               <div id="flex-wr" className="flex flexRem">
                 Win Rate 50%
               </div>
-              <div id="flex-none">NO MATCHES PLAYED</div>
+              <div id="flex-none">UNRANKED</div>
             </div>
           </div>
-          <div id="matches"></div>
+          <div id="matches">
+            {arrayOfMatches.map((match: string) => (
+              <Match text={match} />
+            ))}
+          </div>
         </div>
       </header>
     </div>
