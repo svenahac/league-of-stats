@@ -5,15 +5,16 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState<string>();
   const navigate = useNavigate();
-  let encryptedId = "";
-  let puuid = "";
-  let profilePicId = 0;
-  let summLvl = 0;
-  let arrayOfMatches: string[] = [];
 
-  function servMatch(serv: string) {
+  let encryptedId: string
+  let puuid: string;
+  let profilePicId: number;
+  let summLvl: number;
+  let arrayOfMatches: string[];
+
+  function servMatch(serv: string): string | undefined {
     if (serv == "euw1") {
       return "europe";
     } else if (serv == "na1") {
@@ -21,11 +22,14 @@ function Home() {
     } else if (serv == "kr") {
       return "asia";
     }
+
+    return undefined;
   }
 
   function getMatches(server: string, playerName: string) {
-    let matchServ = servMatch(server);
+    let matchServ: string | undefined = servMatch(server);
     console.log(server);
+
     axios({
       method: "get",
       baseURL: `https://${matchServ}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids`,
@@ -53,7 +57,8 @@ function Home() {
       });
   }
   async function findPlayer() {
-    let playerName = input;
+    let playerName: string | undefined = input;
+
     let server = (
       document.querySelector('input[name="region"]:checked') as HTMLInputElement
     ).value;
@@ -71,7 +76,10 @@ function Home() {
         puuid = response.data.puuid;
         profilePicId = response.data.profileIconId;
         summLvl = response.data.summonerLevel;
-        getMatches(server, playerName);
+        
+        if (playerName) {
+          getMatches(server, playerName);
+        }
       })
       .catch((error) => {
         console.log(error);

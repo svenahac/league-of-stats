@@ -1,68 +1,162 @@
+import { match } from "assert";
 import axios from "axios";
 import { stat } from "fs/promises";
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "../assets/PlayerPage.css";
 
+interface MatchInfo {
+  participants: string[];
+  queueId: number;
+  assists: number;
+  kda: number;
+  champLevel: number;
+  champId: number;
+  deaths: number;
+  goldEarned: number;
+  position: string;
+  item0: number;
+  item1: number;
+  item2: number;
+  item3: number;
+  item4: number;
+  item5: number;
+  item6: number;
+  kills: number;
+  multikill: number;
+  summoner1Id: number;
+  summoner2Id: number;
+  timePlayed: number;
+  dmgDealt: number;
+  dmgTaken: number;
+  vision: number;
+  win: boolean;
+}
+
+interface StatDictionary {
+  tier: string;
+  rank: string;
+  wins: number;
+  losses: number;
+  lp: number;
+}
+
+function getWinRate(wins: number, losses: number): number {
+  const sum = wins + losses;
+  return Math.floor(Math.round(100 * (wins / sum)));
+}
+
+let initted: boolean = false;
+
 export default function PlayerPage() {
-  const { id } = useParams();
   const { state }: any = useLocation();
-  const [isLoading, setLoading] = useState(true);
+
+  // const matchDicts: MatchInfo[] = [];
+  const [matchDicts, setMatchDicts] = useState<MatchInfo[]>([])
+
+  const [summonerName, setSummonerName] = useState<string>();
+
+  const [statDictSolo, setStatDictSolo] = useState<StatDictionary | undefined>(undefined);
+  const [statDictFlex, setStatDictFlex] = useState<StatDictionary | undefined>(undefined);
+
   let encryptedSumId: string = state.id;
   let server: string = state.region;
   let puuid: string = state.puuid;
   let pfpId = state.pfpId;
   let lvl = state.lvl;
-  // let arrayOfMatches = state.matchArr;
-  let arrayOfMatches = ["EUW1_5970140882"];
-  console.log(arrayOfMatches);
-  let matchServ = state.matchServ;
-  let statDict = {
-    summonerName: "",
-    solo_tier: "",
-    solo_rank: "",
-    solo_wins: 0,
-    solo_losses: 0,
-    solo_lp: 0,
-    flex_tier: "",
-    flex_rank: "",
-    flex_wins: 0,
-    flex_losses: 0,
-    flex_lp: 0,
-  };
+  let arrayOfMatches = state.matchArr;
+
+  let matchServ: string | undefined = state.matchServ;
 
   useEffect(() => {
     getStats();
-    //getMatches();
-    // getMatchInfo("EUW1_5970140882");
+    if (!initted) {
+      getMatches();
+      initted = true;
+    }
   }, []);
 
-  interface matchInfo {
-    participants: string[];
-    queueId: number;
-    assists: number;
-    kda: number;
-    champLevel: number;
-    champId: number;
-    deaths: number;
-    goldEarned: number;
-    position: string;
-    item0: number;
-    item1: number;
-    item2: number;
-    item3: number;
-    item4: number;
-    item5: number;
-    item6: number;
-    kills: number;
-    multikill: number;
-    summoner1Id: number;
-    summoner2Id: number;
-    timePlayed: number;
-    dmgDealt: number;
-    dmgTaken: number;
-    vision: number;
-    win: boolean;
+  function getMatches() {
+    const temp = matchDicts;
+
+    arrayOfMatches.forEach(async (match: string) => {
+      try {
+        const response = await axios.get(`https://${matchServ}.api.riotgames.com/lol/match/v5/matches/${match}`, {
+          params: {
+            api_key: process.env.REACT_APP_API_KEY,
+          }, 
+        });
+
+        let players = response.data.info.participants;
+        let player;
+        for (let i = 0; i < players.length; i++) {
+          if (players[i].puuid == puuid) {
+            player = response.data.info.participants[i];
+          }
+        }
+
+        console.log({
+          participants: response.data.metadata.participants,
+          queueId: response.data.info.queueId,
+          assists: player.assists,
+          kda: player.challenges.kda,
+          champLevel: player.champLevel,
+          champId: player.championId,
+          deaths: player.deaths,
+          goldEarned: player.goldEarned,
+          position: player.individualPosition,
+          item0: player.item0,
+          item1: player.item1,
+          item2: player.item2,
+          item3: player.item3,
+          item4: player.item4,
+          item5: player.item5,
+          item6: player.item6,
+          kills: player.kills,
+          multikill: player.largestMultiKill,
+          summoner1Id: player.summoner1Id,
+          summoner2Id: player.summoner2Id,
+          timePlayed: player.timePlayed,
+          dmgDealt: player.totalDamageDealtToChampions,
+          dmgTaken: player.totalDamageTaken,
+          vision: player.visionScore,
+          win: player.win,
+        })
+        
+        temp.push({
+          participants: response.data.metadata.participants,
+          queueId: response.data.info.queueId,
+          assists: player.assists,
+          kda: player.challenges.kda,
+          champLevel: player.champLevel,
+          champId: player.championId,
+          deaths: player.deaths,
+          goldEarned: player.goldEarned,
+          position: player.individualPosition,
+          item0: player.item0,
+          item1: player.item1,
+          item2: player.item2,
+          item3: player.item3,
+          item4: player.item4,
+          item5: player.item5,
+          item6: player.item6,
+          kills: player.kills,
+          multikill: player.largestMultiKill,
+          summoner1Id: player.summoner1Id,
+          summoner2Id: player.summoner2Id,
+          timePlayed: player.timePlayed,
+          dmgDealt: player.totalDamageDealtToChampions,
+          dmgTaken: player.totalDamageTaken,
+          vision: player.visionScore,
+          win: player.win,
+        });
+
+        setMatchDicts(temp);
+
+      } catch(error: any) {
+        console.log(error);
+      }
+    });
   }
 
   function getStats() {
@@ -77,137 +171,37 @@ export default function PlayerPage() {
       .then((response) => {
         let stats = response.data;
         let len = stats.length;
-        statDict.summonerName = stats[0].summonerName;
+        setSummonerName(stats[0].summonerName)
         for (let i = 0; i < len; i++) {
           stats = response.data[i];
           if (stats.queueType == "RANKED_SOLO_5x5") {
-            statDict.solo_wins = stats.wins;
-            statDict.solo_losses = stats.losses;
-            statDict.solo_lp = stats.leaguePoints;
-            statDict.solo_tier = stats.tier;
-            statDict.solo_rank = stats.rank;
+            setStatDictSolo({
+              wins: stats.wins,
+              losses: stats.losses,
+              lp: stats.leaguePoints,
+              tier: stats.tier,
+              rank: stats.rank,
+            })
           } else {
-            statDict.flex_wins = stats.wins;
-            statDict.flex_losses = stats.losses;
-            statDict.flex_lp = stats.leaguePoints;
-            statDict.flex_tier = stats.tier;
-            statDict.flex_rank = stats.rank;
+            setStatDictFlex({
+              wins: stats.wins,
+              losses: stats.losses,
+              lp: stats.leaguePoints,
+              tier: stats.tier,
+              rank: stats.rank,
+            })
           }
-          setStats();
         }
       })
       .catch((error) => {
         console.log(error);
       });
-  }
-
-  function getMatchInfo(matchId: string) {
-    let matchDict: matchInfo;
-    axios({
-      method: "get",
-      url: `/${matchId}`,
-      baseURL: `https://${matchServ}.api.riotgames.com/lol/match/v5/matches`,
-      params: {
-        api_key: process.env.REACT_APP_API_KEY,
-      },
-    })
-      .then((response) => {
-        let players = response.data.info.participants;
-        let player;
-        for (let i = 0; i < players.length; i++) {
-          if (players[i].puuid == puuid) {
-            player = response.data.info.participants[i];
-          }
-        }
-        matchDict.participants = response.data.metadata.participants;
-        matchDict.queueId = response.data.info.queueId;
-        matchDict.assists = player.assists;
-        matchDict.kda = player.challenges.kda;
-        matchDict.champLevel = player.champLevel;
-        matchDict.champId = player.championId;
-        matchDict.deaths = player.deaths;
-        matchDict.goldEarned = player.goldEarned;
-        matchDict.position = player.individualPosition;
-        matchDict.item0 = player.item0;
-        matchDict.item1 = player.item1;
-        matchDict.item2 = player.item2;
-        matchDict.item3 = player.item3;
-        matchDict.item4 = player.item4;
-        matchDict.item5 = player.item5;
-        matchDict.item6 = player.item6;
-        matchDict.kills = player.kills;
-        matchDict.multikill = player.largestMultiKill;
-        matchDict.summoner1Id = player.summoner1Id;
-        matchDict.summoner2Id = player.summoner2Id;
-        matchDict.timePlayed = player.timePlayed;
-        matchDict.dmgDealt = player.totalDamageDealtToChampions;
-        matchDict.dmgTaken = player.totalDamageTaken;
-        matchDict.vision = player.visionScore;
-        matchDict.win = player.win;
-      })
-
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  function setStats() {
-    let soloArr = document.getElementsByClassName("solo");
-    let flexArr = document.getElementsByClassName("flex");
-    let soloBox = document.querySelectorAll("soloRem");
-    let flexBox = document.querySelectorAll(".flexRem");
-    let sumName = document.getElementById("sumName");
-    let level = document.getElementById("lvl");
-
-    level!.innerHTML = `${lvl}`;
-    sumName!.innerHTML = statDict.summonerName;
-    let pfpic = document.getElementById("pfpic") as HTMLImageElement;
-    pfpic.src = `http://ddragon.leagueoflegends.com/cdn/12.13.1/img/profileicon/${pfpId}.png`;
-    setTimeout(() => {
-      if (statDict.solo_losses == 0 && statDict.solo_wins == 0) {
-        for (let i = 0; i < soloBox.length; i++) {
-          soloBox[i].remove();
-        }
-        document.getElementById("solo-none")!.style.visibility = "visible";
-      } else {
-        let getWr = () => {
-          let sum = statDict.solo_wins + statDict.solo_losses;
-          return Math.floor(Math.round(100 * (statDict.solo_wins / sum)));
-        };
-        soloArr[1].innerHTML = statDict.solo_tier + " " + statDict.solo_rank;
-        soloArr[2].innerHTML = `${statDict.solo_lp} LP`;
-        soloArr[3].innerHTML = `${statDict.solo_wins}W ${statDict.solo_losses}L`;
-        soloArr[4].innerHTML = `Win Rate ${getWr()}%`;
-        (
-          soloArr[0] as HTMLImageElement
-        ).src = `${require(`../images/${statDict.solo_tier.toLowerCase()}.png`)}`;
-      }
-    }, 100);
-
-    if (statDict.flex_losses == 0 && statDict.flex_wins == 0) {
-      for (let i = 0; i < flexBox.length; i++) {
-        flexBox[i].remove();
-      }
-      document.getElementById("flex-none")!.style.visibility = "visible";
-    } else {
-      let getWr = () => {
-        let sum = statDict.flex_wins + statDict.flex_losses;
-        return Math.floor(Math.round(100 * (statDict.flex_wins / sum)));
-      };
-      flexArr[1].innerHTML = statDict.flex_tier + " " + statDict.flex_rank;
-      flexArr[2].innerHTML = `${statDict.flex_lp} LP`;
-      flexArr[3].innerHTML = `${statDict.flex_wins}W ${statDict.flex_losses}L`;
-      flexArr[4].innerHTML = `Win Rate ${getWr()}%`;
-      (
-        flexArr[0] as HTMLImageElement
-      ).src = `${require(`../images/${statDict.flex_tier.toLowerCase()}.png`)}`;
-    }
   }
 
   function Match(props: any) {
-    // let role = "top";
-    // let matchDict = getMatchInfo(props.text);
-    //console.log(matchDict);
+    console.log(props.match);
+    const match: MatchInfo = props.match;
+
     return (
       <div className="match">
         <div className="big-right-angle"></div>
@@ -222,7 +216,7 @@ export default function PlayerPage() {
         <div className="champIcon"></div>
         <div className="score">17/10/12</div>
         <div className="kda">KDA: 3.56</div>
-        <div className="role">MID</div>
+        <div className="role">{match.position}</div>
         <div className="gametime">25m 34s</div>
         <div className="summoner1 items">
           <img src="http://ddragon.leagueoflegends.com/cdn/12.14.1/img/spell/SummonerFlash.png"></img>
@@ -306,63 +300,69 @@ export default function PlayerPage() {
         <div id="main">
           <div id="statpage">
             <div id="summoner">
-              <h1 id="sumName">Summoner name</h1>
+              <h1 id="sumName">{summonerName}</h1>
               <div id="pfp">
                 <img
                   id="pfpic"
-                  src="http://ddragon.leagueoflegends.com/cdn/12.13.1/img/profileicon/588.png"
+                  src={`http://ddragon.leagueoflegends.com/cdn/12.13.1/img/profileicon/${pfpId}.png`}
                 ></img>
               </div>
               <div id="oval">
-                <div id="lvl">300</div>
+                <div id="lvl">{lvl}</div>
               </div>
             </div>
-            <div id="solo">
-              <img
-                id="solo-img"
-                className="solo soloRem"
-                src={require("../images/iron.png")}
-              ></img>
-              <div id="solo-queue">Ranked Solo</div>
-              <div id="solo-rank" className="solo soloRem">
-                Iron 4
+            {statDictSolo !== undefined ? 
+              <div id="solo">
+                <img
+                  id="solo-img"
+                  className="solo soloRem"
+                  src={require(`../images/${statDictSolo.tier.toLowerCase()}.png`)}
+                ></img>
+                <div id="solo-queue">Ranked Solo</div>
+                <div id="solo-rank" className="solo soloRem">
+                  {`${statDictSolo.tier} ${statDictSolo.rank}`}
+                </div>
+                <div id="solo-lp" className="solo soloRem">
+                  {`${statDictSolo.lp} Lp`}
+                </div>
+                <div id="solo-win-loss" className="solo soloRem">
+                  {`${statDictSolo.wins}W ${statDictSolo.losses}L`}
+                </div>
+                <div id="solo-wr" className="solo soloRem">
+                  {`Win Rate: ${getWinRate(statDictSolo.wins, statDictSolo.losses)}%`}
+                </div>
+              </div> : <div id="solo">
+                <div id="solo-none">UNRANKED</div>
               </div>
-              <div id="solo-lp" className="solo soloRem">
-                15 Lp
+            }
+            {statDictFlex !== undefined ? 
+              <div id="flex">
+                <img
+                  id="flex-img"
+                  className="flex flexRem"
+                  src={require(`../images/${statDictFlex.tier.toLowerCase()}.png`)}
+                ></img>
+                <div id="flex-queue">Ranked Solo</div>
+                <div id="flex-rank" className="flex flexRem">
+                  {`${statDictFlex.tier} ${statDictFlex.rank}`}
+                </div>
+                <div id="flex-lp" className="flex flexRem">
+                  {`${statDictFlex.lp} Lp`}
+                </div>
+                <div id="flex-win-loss" className="flex flexRem">
+                  {`${statDictFlex.wins}W ${statDictFlex.losses}L`}
+                </div>
+                <div id="flex-wr" className="flex flexRem">
+                  {`Win Rate: ${getWinRate(statDictFlex.wins, statDictFlex.losses)}%`}
+                </div>
+              </div> : <div id="flex">
+                <div id="flex-none">UNRANKED</div>
               </div>
-              <div id="solo-win-loss" className="solo soloRem">
-                20W 20L
-              </div>
-              <div id="solo-wr" className="solo soloRem">
-                Win Rate 50%
-              </div>
-              <div id="solo-none">UNRANKED</div>
-            </div>
-            <div id="flex">
-              <img
-                id="flex-img"
-                className="flex flexRem"
-                src={require("../images/iron.png")}
-              ></img>
-              <div id="flex-queue">Ranked Flex</div>
-              <div id="flex-rank" className="flex flexRem">
-                Iron 4
-              </div>
-              <div id="flex-lp" className="flex flexRem">
-                15 Lp
-              </div>
-              <div id="flex-win-loss" className="flex flexRem">
-                20W 20L
-              </div>
-              <div id="flex-wr" className="flex flexRem">
-                Win Rate 50%
-              </div>
-              <div id="flex-none">UNRANKED</div>
-            </div>
+            }
           </div>
           <div id="matches">
-            {arrayOfMatches.map((match: string) => (
-              <Match text={match} />
+            {matchDicts.map((matchDict: MatchInfo) => (
+              <Match match={matchDict} key={`${matchDict.dmgDealt}-${matchDict.dmgTaken}-${matchDict.goldEarned}-${summonerName}`} />
             ))}
           </div>
         </div>
