@@ -11,7 +11,7 @@ interface MatchInfo {
   assists: number;
   kda: number;
   champLevel: number;
-  champId: number;
+  champName: string;
   deaths: number;
   goldEarned: number;
   position: string;
@@ -41,6 +41,19 @@ interface StatDictionary {
   lp: number;
 }
 
+interface Players {
+  summoner0: string;
+  summoner1: string;
+  summoner2: string;
+  summoner3: string;
+  summoner4: string;
+  summoner5: string;
+  summoner6: string;
+  summoner7: string;
+  summoner8: string;
+  summoner9: string;
+}
+
 function getWinRate(wins: number, losses: number): number {
   const sum = wins + losses;
   return Math.floor(Math.round(100 * (wins / sum)));
@@ -62,6 +75,7 @@ export default function PlayerPage() {
   const [statDictFlex, setStatDictFlex] = useState<StatDictionary | undefined>(
     undefined
   );
+  const [playerDict, setPlayerDict] = useState<Players[]>([]);
 
   let encryptedSumId: string = state.id;
   let server: string = state.region;
@@ -82,6 +96,8 @@ export default function PlayerPage() {
 
   function getMatches() {
     const temp = matchDicts;
+    let tempPlay: string[] = [];
+    const temp2 = playerDict;
 
     arrayOfMatches.forEach(async (match: string) => {
       try {
@@ -102,13 +118,30 @@ export default function PlayerPage() {
           }
         }
 
+        for (let i = 0; i < players.length; i++) {
+          tempPlay.push(players[i].summonerName);
+        }
+
+        temp2.push({
+          summoner0: tempPlay[0],
+          summoner1: tempPlay[1],
+          summoner2: tempPlay[2],
+          summoner3: tempPlay[3],
+          summoner4: tempPlay[4],
+          summoner5: tempPlay[5],
+          summoner6: tempPlay[6],
+          summoner7: tempPlay[7],
+          summoner8: tempPlay[8],
+          summoner9: tempPlay[9],
+        });
+
         temp.push({
-          participants: response.data.metadata.participants,
+          participants: tempPlay,
           queueId: response.data.info.queueId,
           assists: player.assists,
           kda: player.challenges.kda,
           champLevel: player.champLevel,
-          champId: player.championId,
+          champName: player.championName,
           deaths: player.deaths,
           goldEarned: player.goldEarned,
           position: player.individualPosition,
@@ -129,7 +162,8 @@ export default function PlayerPage() {
           vision: player.visionScore,
           win: player.win,
         });
-
+        tempPlay = [];
+        setPlayerDict(temp2);
         setMatchDicts(temp);
       } catch (error: any) {
         console.log(error);
@@ -178,34 +212,80 @@ export default function PlayerPage() {
 
   function Match(props: any) {
     const match: MatchInfo = props.match;
+    let summonerArr = match.participants;
     switch (match.position) {
       case "Invalid":
         match.position = "";
         break;
-      case "BOTTOM":
-        match.position = "BOT";
+      case "JUNGLE":
+        match.position = "JNG";
         break;
       case "MIDDLE":
         match.position = "MID";
         break;
+      case "BOTTOM":
+        match.position = "BOT";
+        break;
+      case "UTILITY":
+        match.position = "SUP";
+        break;
+      default:
+        match.position = "";
+    }
+    let matchType: string;
+    switch (match.queueId) {
+      case 420:
+        matchType = "Ranked Solo";
+        break;
+      case 440:
+        matchType = "Ranked Flex";
+        break;
+      case 450:
+        matchType = "ARAM";
+        break;
+      case 700:
+        matchType = "Clash";
+        break;
+      default:
+        matchType = "Normal";
     }
 
+    let color1 = "white";
+    let color2: string;
+    if (match.win) {
+      color1 = "#87cefa";
+      color2 = "#269ce6";
+    } else {
+      color1 = "#eb4646";
+      color2 = "#f81c1c";
+    }
+
+    const minutes = Math.floor(match.timePlayed / 60);
+    const seconds = match.timePlayed - minutes * 60;
+
     return (
-      <div className="match">
+      <div className="match" style={{ backgroundColor: `${color1}` }}>
         <div className="big-right-angle"></div>
         <div className="small-right-angle"></div>
         <div className="line"></div>
         <div className="vertical-line"></div>
         <div className="bottom-line"></div>
-        <div className="matchRes"></div>
+        <div
+          className="matchRes"
+          style={{ backgroundColor: `${color2}` }}
+        ></div>
         <div className="lvlBox">
           <div className="level">{match.champLevel}</div>
         </div>
-        <div className="champIcon"></div>
+        <div className="champIcon">
+          <img
+            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/champion/${match.champName}.png`}
+          ></img>
+        </div>
         <div className="score">{`${match.kills}/${match.deaths}/${match.assists}`}</div>
         <div className="kda">{`KDA: ${match.kda.toFixed(2)}`}</div>
         <div className="role">{match.position}</div>
-        <div className="gametime">25m 34s</div>
+        <div className="gametime">{`${minutes}m ${seconds}s`}</div>
         <div className="summoner1 items">
           <img src="http://ddragon.leagueoflegends.com/cdn/12.14.1/img/spell/SummonerFlash.png"></img>
         </div>
@@ -213,41 +293,69 @@ export default function PlayerPage() {
           <img src="http://ddragon.leagueoflegends.com/cdn/12.14.1/img/spell/SummonerExhaust.png"></img>
         </div>
         <div className="item0 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item0}.png`}
-          ></img>
+          {match.item0 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item0}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="item1 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item1}.png`}
-          ></img>
+          {match.item1 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item1}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="item2 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item2}.png`}
-          ></img>
+          {match.item2 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item2}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="item3 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item3}.png`}
-          ></img>
+          {match.item3 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item3}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="item4 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item4}.png`}
-          ></img>
+          {match.item4 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item4}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="item5 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item5}.png`}
-          ></img>
+          {match.item5 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item5}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="item6 items">
-          <img
-            src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item6}.png`}
-          ></img>
+          {match.item6 != 0 ? (
+            <img
+              src={`http://ddragon.leagueoflegends.com/cdn/12.14.1/img/item/${match.item6}.png`}
+            ></img>
+          ) : (
+            <></>
+          )}
         </div>
-        <div className="queue-type">Ranked Solo</div>
+        <div className="queue-type">{matchType}</div>
         <div className="dmg-dealt num-stat">{`Damage Dealt: ${match.dmgDealt}`}</div>
         <div className="dmg-taken num-stat">{`Damage Taken: ${match.dmgTaken}`}</div>
         <div className="gold num-stat">{`Gold Earned: ${match.goldEarned}`}</div>
@@ -256,38 +364,38 @@ export default function PlayerPage() {
           <div className="team1">
             <ul>
               <li>
-                <a>Summoner1</a>
+                <a>{summonerArr[0]}</a>
               </li>
               <li>
-                <a>Summoner2</a>
+                <a>{summonerArr[1]}</a>
               </li>
               <li>
-                <a>Summoner3</a>
+                <a>{summonerArr[2]}</a>
               </li>
               <li>
-                <a>Summoner4</a>
+                <a>{summonerArr[3]}</a>
               </li>
               <li>
-                <a>Summoner5</a>
+                <a>{summonerArr[4]}</a>
               </li>
             </ul>
           </div>
           <div className="team2">
             <ul>
               <li>
-                <a>Summoner1</a>
+                <a>{summonerArr[5]}</a>
               </li>
               <li>
-                <a>Summoner2</a>
+                <a>{summonerArr[6]}</a>
               </li>
               <li>
-                <a>Summoner3</a>
+                <a>{summonerArr[7]}</a>
               </li>
               <li>
-                <a>Summoner4</a>
+                <a>{summonerArr[8]}</a>
               </li>
               <li>
-                <a>Summoner5</a>
+                <a>{summonerArr[9]}</a>
               </li>
             </ul>
           </div>
