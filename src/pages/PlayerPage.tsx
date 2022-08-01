@@ -1,11 +1,14 @@
 import { match } from "assert";
 import axios from "axios";
 import { stat } from "fs/promises";
-import React, { useEffect, useState } from "react";
+import moment from "moment";
+import React, { FC, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { HashLoader } from "react-spinners";
 import "../assets/PlayerPage.css";
 
 interface MatchInfo {
+  matchEndTime: number;
   participants: string[];
   queueId: number;
   assists: number;
@@ -41,30 +44,14 @@ interface StatDictionary {
   lp: number;
 }
 
-interface Players {
-  summoner0: string;
-  summoner1: string;
-  summoner2: string;
-  summoner3: string;
-  summoner4: string;
-  summoner5: string;
-  summoner6: string;
-  summoner7: string;
-  summoner8: string;
-  summoner9: string;
-}
-
 function getWinRate(wins: number, losses: number): number {
   const sum = wins + losses;
   return Math.floor(Math.round(100 * (wins / sum)));
 }
 
-let initted: boolean = false;
-
 export default function PlayerPage() {
   const { state }: any = useLocation();
 
-  // const matchDicts: MatchInfo[] = [];
   const [matchDicts, setMatchDicts] = useState<MatchInfo[]>([]);
 
   const [summonerName, setSummonerName] = useState<string>();
@@ -75,7 +62,8 @@ export default function PlayerPage() {
   const [statDictFlex, setStatDictFlex] = useState<StatDictionary | undefined>(
     undefined
   );
-  const [playerDict, setPlayerDict] = useState<Players[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(true);
 
   let encryptedSumId: string = state.id;
   let server: string = state.region;
@@ -88,16 +76,12 @@ export default function PlayerPage() {
 
   useEffect(() => {
     getStats();
-    if (!initted) {
-      getMatches();
-      initted = true;
-    }
+    getMatches();
   }, []);
 
   function getMatches() {
     const temp = matchDicts;
     let tempPlay: string[] = [];
-    const temp2 = playerDict;
 
     arrayOfMatches.forEach(async (match: string) => {
       try {
@@ -118,24 +102,12 @@ export default function PlayerPage() {
           }
         }
 
-        for (let i = 0; i < players.length; i++) {
-          tempPlay.push(players[i].summonerName);
-        }
-
-        temp2.push({
-          summoner0: tempPlay[0],
-          summoner1: tempPlay[1],
-          summoner2: tempPlay[2],
-          summoner3: tempPlay[3],
-          summoner4: tempPlay[4],
-          summoner5: tempPlay[5],
-          summoner6: tempPlay[6],
-          summoner7: tempPlay[7],
-          summoner8: tempPlay[8],
-          summoner9: tempPlay[9],
+        players.forEach((tmp: any) => {
+          tempPlay.push(tmp.summonerName);
         });
 
         temp.push({
+          matchEndTime: response.data.info.gameEndTimestamp,
           participants: tempPlay,
           queueId: response.data.info.queueId,
           assists: player.assists,
@@ -163,8 +135,10 @@ export default function PlayerPage() {
           win: player.win,
         });
         tempPlay = [];
-        setPlayerDict(temp2);
         setMatchDicts(temp);
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       } catch (error: any) {
         console.log(error);
       }
@@ -229,8 +203,6 @@ export default function PlayerPage() {
       case "UTILITY":
         match.position = "SUP";
         break;
-      default:
-        match.position = "";
     }
     let matchType: string;
     switch (match.queueId) {
@@ -262,6 +234,13 @@ export default function PlayerPage() {
 
     const minutes = Math.floor(match.timePlayed / 60);
     const seconds = match.timePlayed - minutes * 60;
+
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dateRoot = new Date(match.matchEndTime);
+    const dateNow = new Date(Date.now());
+    const time = dateNow.getTime() - dateRoot.getTime();
+    const diffInDays = Math.round(time / oneDay);
+    const diffInHours = Math.round(time / (oneDay / 24));
 
     return (
       <div className="match" style={{ backgroundColor: `${color1}` }}>
@@ -356,6 +335,11 @@ export default function PlayerPage() {
           )}
         </div>
         <div className="queue-type">{matchType}</div>
+        <div className="match-end">
+          {diffInHours <= 24
+            ? `${diffInHours} hours ago`
+            : `${diffInDays} days ago`}
+        </div>
         <div className="dmg-dealt num-stat">{`Damage Dealt: ${match.dmgDealt}`}</div>
         <div className="dmg-taken num-stat">{`Damage Taken: ${match.dmgTaken}`}</div>
         <div className="gold num-stat">{`Gold Earned: ${match.goldEarned}`}</div>
@@ -402,6 +386,25 @@ export default function PlayerPage() {
         </div>
       </div>
     );
+  }
+
+  function renderMatches() {
+    if (loading) {
+      return (
+        <div className="loader">
+          <HashLoader size={150} color="white" loading={true} />
+        </div>
+      );
+    }
+
+    return matchDicts
+      .slice(0, 5)
+      .map((matchDict: MatchInfo) => (
+        <Match
+          match={matchDict}
+          key={`${matchDict.dmgDealt}-${matchDict.dmgTaken}-${matchDict.goldEarned}-${summonerName}`}
+        />
+      ));
   }
 
   return (
@@ -480,14 +483,7 @@ export default function PlayerPage() {
               </div>
             )}
           </div>
-          <div id="matches">
-            {matchDicts.map((matchDict: MatchInfo) => (
-              <Match
-                match={matchDict}
-                key={`${matchDict.dmgDealt}-${matchDict.dmgTaken}-${matchDict.goldEarned}-${summonerName}`}
-              />
-            ))}
-          </div>
+          <div id="matches">{renderMatches()}</div>
         </div>
       </header>
     </div>

@@ -134,6 +134,14 @@
   /* overflow: scroll; */
 }
 
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36rem;
+  height: 34rem;
+}
+
 .match {
   z-index: 1;
   overflow: hidden;
@@ -366,10 +374,24 @@
 .queue-type {
   position: absolute;
   font-weight: 500;
-  left: 17rem;
+  left: 13rem;
   top: 3.4rem;
   height: 20px;
   width: 100px;
+  background-color: white;
+  border: black solid 2px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.match-end {
+  position: absolute;
+  font-weight: 500;
+  font-size: 0.8rem;
+  left: 19.7rem;
+  top: 3.4rem;
+  height: 20px;
+  width: 85px;
   background-color: white;
   border: black solid 2px;
   border-top-left-radius: 10px;

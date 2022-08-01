@@ -8,7 +8,7 @@ function Home() {
   const [input, setInput] = useState<string>();
   const navigate = useNavigate();
 
-  let encryptedId: string
+  let encryptedId: string;
   let puuid: string;
   let profilePicId: number;
   let summLvl: number;
@@ -28,7 +28,6 @@ function Home() {
 
   function getMatches(server: string, playerName: string) {
     let matchServ: string | undefined = servMatch(server);
-    console.log(server);
 
     axios({
       method: "get",
@@ -71,12 +70,11 @@ function Home() {
       },
     })
       .then((response) => {
-        console.log(response.status);
         encryptedId = response.data.id;
         puuid = response.data.puuid;
         profilePicId = response.data.profileIconId;
         summLvl = response.data.summonerLevel;
-        
+
         if (playerName) {
           getMatches(server, playerName);
         }
