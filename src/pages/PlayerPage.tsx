@@ -1,9 +1,6 @@
-import { match } from "assert";
 import axios from "axios";
-import { stat } from "fs/promises";
-import moment from "moment";
-import React, { FC, useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { HashLoader } from "react-spinners";
 import "../assets/PlayerPage.css";
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../assets/Home.css";
 import "../assets/App.css";
 import axios from "axios";
