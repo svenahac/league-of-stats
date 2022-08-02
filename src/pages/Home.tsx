@@ -81,6 +81,7 @@ function Home() {
       })
       .catch((error) => {
         console.log(error);
+        alert("Invalid name");
       });
   }
 

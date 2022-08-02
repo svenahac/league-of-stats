@@ -126,6 +126,8 @@
 }
 
 #matches {
+  display: flex;
+  flex-direction: column;
   width: 36rem;
   height: 34rem;
   border: white solid 4px;
@@ -427,8 +429,21 @@
   font-size: 9px;
 }
 
-@media screen and (max-width: 730px) {
-  #stats {
-    font-size: 1rem;
+@media screen and (max-width: 946px) {
+  #main {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  #matches {
+    transform: scale(0.95);
+  }
+}
+
+@media screen and (max-width: 564px) {
+  #matches {
+    transform: scale(0.65);
   }
 }

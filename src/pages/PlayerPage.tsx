@@ -5,6 +5,7 @@ import { HashLoader } from "react-spinners";
 import "../assets/PlayerPage.css";
 
 interface MatchInfo {
+  matchId: string;
   matchEndTime: number;
   participants: string[];
   queueId: number;
@@ -68,7 +69,6 @@ export default function PlayerPage() {
   let pfpId = state.pfpId;
   let lvl = state.lvl;
   let arrayOfMatches = state.matchArr;
-
   let matchServ: string | undefined = state.matchServ;
 
   useEffect(() => {
@@ -102,8 +102,8 @@ export default function PlayerPage() {
         players.forEach((tmp: any) => {
           tempPlay.push(tmp.summonerName);
         });
-
         temp.push({
+          matchId: response.data.metadata.matchId,
           matchEndTime: response.data.info.gameEndTimestamp,
           participants: tempPlay,
           queueId: response.data.info.queueId,
@@ -184,6 +184,28 @@ export default function PlayerPage() {
   function Match(props: any) {
     const match: MatchInfo = props.match;
     let summonerArr = match.participants;
+    let position: number;
+
+    switch (match.matchId) {
+      case arrayOfMatches[0]:
+        position = 1;
+        break;
+      case arrayOfMatches[1]:
+        position = 2;
+        break;
+      case arrayOfMatches[2]:
+        position = 3;
+        break;
+      case arrayOfMatches[3]:
+        position = 4;
+        break;
+      case arrayOfMatches[4]:
+        position = 5;
+        break;
+      default:
+        position = 1;
+    }
+
     switch (match.position) {
       case "Invalid":
         match.position = "";
@@ -238,9 +260,22 @@ export default function PlayerPage() {
     const time = dateNow.getTime() - dateRoot.getTime();
     const diffInDays = Math.round(time / oneDay);
     const diffInHours = Math.round(time / (oneDay / 24));
+    let hours = "hour";
+    let days = "day";
+
+    if (diffInDays > 1) {
+      days = "days";
+    }
+
+    if (diffInHours > 1) {
+      hours = "hours";
+    }
 
     return (
-      <div className="match" style={{ backgroundColor: `${color1}` }}>
+      <div
+        className="match"
+        style={{ backgroundColor: `${color1}`, order: `${position}` }}
+      >
         <div className="big-right-angle"></div>
         <div className="small-right-angle"></div>
         <div className="line"></div>
@@ -334,8 +369,8 @@ export default function PlayerPage() {
         <div className="queue-type">{matchType}</div>
         <div className="match-end">
           {diffInHours <= 24
-            ? `${diffInHours} hours ago`
-            : `${diffInDays} days ago`}
+            ? `${diffInHours} ${hours} ago`
+            : `${diffInDays} ${days} ago`}
         </div>
         <div className="dmg-dealt num-stat">{`Damage Dealt: ${match.dmgDealt}`}</div>
         <div className="dmg-taken num-stat">{`Damage Taken: ${match.dmgTaken}`}</div>
