@@ -16,6 +16,7 @@ function Home() {
   let summName: string;
 
   function servMatch(serv: string): string | undefined {
+    // Sets the server for finding matches
     if (serv == "euw1") {
       return "europe";
     } else if (serv == "na1") {
@@ -28,6 +29,8 @@ function Home() {
   }
 
   function getMatches(server: string, playerName: string) {
+    // The function posts an API request to get the most recent 5 matches played, then navigates
+    // to the player page
     let matchServ: string | undefined = servMatch(server);
 
     axios({
@@ -41,6 +44,7 @@ function Home() {
       .then((response) => {
         arrayOfMatches = response.data;
         navigate(`/summoners/${playerName}`, {
+          // Sending variables throught state
           state: {
             id: encryptedId,
             region: server,
@@ -58,6 +62,7 @@ function Home() {
       });
   }
   async function findPlayer() {
+    // Function posts an API request to get basic user info 
     let playerName: string | undefined = input;
 
     let server = (

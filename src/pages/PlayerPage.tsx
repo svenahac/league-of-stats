@@ -43,6 +43,7 @@ interface StatDictionary {
 }
 
 function getWinRate(wins: number, losses: number): number {
+  // Calculates winrate %
   const sum = wins + losses;
   return Math.floor(Math.round(100 * (wins / sum)));
 }
@@ -77,6 +78,7 @@ export default function PlayerPage() {
   }, []);
 
   function getMatches() {
+    // Gets desired stats for the matches, from a get request, and puts them in a array
     const temp = matchDicts;
     let tempPlay: string[] = [];
 
@@ -143,6 +145,7 @@ export default function PlayerPage() {
   }
 
   function getStats() {
+    // The function gets Queue statistics for Solo and Flex queue
     axios({
       method: "get",
       url: `/${encryptedSumId}`,
@@ -182,10 +185,12 @@ export default function PlayerPage() {
   }
 
   function Match(props: any) {
+    // React component for a single match
     const match: MatchInfo = props.match;
     let summonerArr = match.participants;
     let position = 1;
 
+    // Setting the flex order property in css, so that the most recent match is displayed first
     for (let i = 0; i < arrayOfMatches.length; i++) {
       if (match.matchId === arrayOfMatches[i]) position = i;
     }
@@ -224,6 +229,7 @@ export default function PlayerPage() {
         matchType = "Normal";
     }
 
+    // Setting the color depending on if the match was won
     let color1 = "white";
     let color2: string;
     if (match.win) {
@@ -234,9 +240,11 @@ export default function PlayerPage() {
       color2 = "#f81c1c";
     }
 
+    // How long the match was played
     const minutes = Math.floor(match.timePlayed / 60);
     const seconds = match.timePlayed - minutes * 60;
 
+    // How long ago the match was played
     const oneDay = 1000 * 60 * 60 * 24;
     const dateRoot = new Date(match.matchEndTime);
     const dateNow = new Date(Date.now());
@@ -404,6 +412,7 @@ export default function PlayerPage() {
   }
 
   function renderMatches() {
+    // Function renders 5 most recent matches
     if (loading) {
       return (
         <div className="loader">
