@@ -13,6 +13,7 @@ function Home() {
   let profilePicId: number;
   let summLvl: number;
   let arrayOfMatches: string[];
+  let summName: string;
 
   function servMatch(serv: string): string | undefined {
     if (serv == "euw1") {
@@ -48,6 +49,7 @@ function Home() {
             lvl: summLvl,
             matchArr: arrayOfMatches,
             matchServ: matchServ,
+            summName: summName,
           },
         });
       })
@@ -74,6 +76,7 @@ function Home() {
         puuid = response.data.puuid;
         profilePicId = response.data.profileIconId;
         summLvl = response.data.summonerLevel;
+        summName = response.data.name;
 
         if (playerName) {
           getMatches(server, playerName);

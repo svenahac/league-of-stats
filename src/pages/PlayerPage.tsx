@@ -154,7 +154,7 @@ export default function PlayerPage() {
       .then((response) => {
         let stats = response.data;
         let len = stats.length;
-        setSummonerName(stats[0].summonerName);
+        setSummonerName(state.summName);
         for (let i = 0; i < len; i++) {
           stats = response.data[i];
           if (stats.queueType == "RANKED_SOLO_5x5") {
@@ -184,28 +184,11 @@ export default function PlayerPage() {
   function Match(props: any) {
     const match: MatchInfo = props.match;
     let summonerArr = match.participants;
-    let position: number;
+    let position = 1;
 
-    switch (match.matchId) {
-      case arrayOfMatches[0]:
-        position = 1;
-        break;
-      case arrayOfMatches[1]:
-        position = 2;
-        break;
-      case arrayOfMatches[2]:
-        position = 3;
-        break;
-      case arrayOfMatches[3]:
-        position = 4;
-        break;
-      case arrayOfMatches[4]:
-        position = 5;
-        break;
-      default:
-        position = 1;
+    for (let i = 0; i < arrayOfMatches.length; i++) {
+      if (match.matchId === arrayOfMatches[i]) position = i;
     }
-
     switch (match.position) {
       case "Invalid":
         match.position = "";
